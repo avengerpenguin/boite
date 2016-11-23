@@ -1,0 +1,5 @@
+clize
+IMAPClient
+pytest
+pytest-cov
+pytest-xdist
