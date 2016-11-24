@@ -34,7 +34,7 @@ $(VENV)/bin/py.test: $(PIP)
 	$(PIP) install pytest pytest-cov pytest-xdist pytest-django
 
 $(PYTHON) $(PIP):
-	virtualenv venv
+	virtualenv -p python3 venv
 	$(PIP) install virtualenv
 
 $(VENV)/bin/pip-sync $(VENV)/bin/pip-compile: $(PIP)

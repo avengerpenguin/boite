@@ -1,3 +1,6 @@
+import json
+
+
 class Proxy(object):
     __slots__ = ["_obj", "__weakref__"]
 
@@ -85,3 +88,20 @@ class Proxy(object):
         ins = object.__new__(theclass)
         theclass.__init__(ins, obj, *args, **kwargs)
         return ins
+
+
+class ImapProxy(Proxy):
+    def __getattribute__(self, name):
+
+        x = getattr(object.__getattribute__(self, "_obj"), name)
+
+        if callable(x):
+            def y(*args, **kwargs):
+                r = x(*args, **kwargs)
+                print(r)
+                print(x.__name__)
+                print(eval(repr(r)))
+                return r
+            return y
+        else:
+            return x
