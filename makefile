@@ -59,4 +59,5 @@ pep8.errors: $(PEP8) $(PYSRC)
 test: $(PYSRC) $(PYTHON) venv/bin/pip-sync requirements.txt $(PYTEST)
 	source venv/bin/activate \
 	    && venv/bin/pip-sync \
-        && $(PYTEST) test/*.py
+	    && export PYTHONPATH=$(PWD):$(PYTHONPATH) \
+	    && $(PYTEST) test/*.py

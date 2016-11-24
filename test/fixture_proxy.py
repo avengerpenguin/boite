@@ -1,4 +1,5 @@
 import json
+import os
 
 
 class Proxy(object):
@@ -91,17 +92,30 @@ class Proxy(object):
 
 
 class ImapProxy(Proxy):
+    def __init__(self, obj):
+        object.__setattr__(self, "_obj", obj)
+        self.cache = {}
+        if os.path.exists('fixtures.json'):
+            with open('fixtures.json') as fixtures_file:
+                self.cache = json.loads(fixtures_file.read())
+
     def __getattribute__(self, name):
 
         x = getattr(object.__getattribute__(self, "_obj"), name)
 
         if callable(x):
             def y(*args, **kwargs):
-                r = x(*args, **kwargs)
-                print(r)
-                print(x.__name__)
-                print(eval(repr(r)))
-                return r
+                cache_key = x.__name__ + ':' + str(args) + str(kwargs)
+                if cache_key in self.cache:
+                    print('Returning from cache')
+                    return eval(self.cache[cache_key])
+                else:
+                    print('Calling for real')
+                    r = x(*args, **kwargs)
+                    self.cache[cache_key] = repr(r)
+                    with open('fixtures.json', 'w') as fixture_file:
+                        fixture_file.write(json.dumps(self.cache, indent=4))
+                    return r
             return y
         else:
             return x
