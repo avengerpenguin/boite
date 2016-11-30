@@ -29,6 +29,9 @@ class Proxy(object):
     def __repr__(self):
         return repr(object.__getattribute__(self, "_obj"))
 
+    def __hash__(self):
+        return hash(object.__getattribute__(self, "_obj"))
+
     #
     # factories
     #
@@ -36,7 +39,7 @@ class Proxy(object):
         '__abs__', '__add__', '__and__', '__call__', '__cmp__', '__coerce__',
         '__contains__', '__delitem__', '__delslice__', '__div__', '__divmod__',
         '__eq__', '__float__', '__floordiv__', '__ge__', '__getitem__',
-        '__getslice__', '__gt__', '__hash__', '__hex__', '__iadd__', '__iand__',
+        '__getslice__', '__gt__', '__hex__', '__iadd__', '__iand__',
         '__idiv__', '__idivmod__', '__ifloordiv__', '__ilshift__', '__imod__',
         '__imul__', '__int__', '__invert__', '__ior__', '__ipow__',
         '__irshift__',
@@ -44,7 +47,7 @@ class Proxy(object):
         '__long__', '__lshift__', '__lt__', '__mod__', '__mul__', '__ne__',
         '__neg__', '__oct__', '__or__', '__pos__', '__pow__', '__radd__',
         '__rand__', '__rdiv__', '__rdivmod__', '__reduce__', '__reduce_ex__',
-        '__repr__', '__reversed__', '__rfloorfiv__', '__rlshift__', '__rmod__',
+        '__repr__', '__reversed__', '__rfloordiv__', '__rlshift__', '__rmod__',
         '__rmul__', '__ror__', '__rpow__', '__rrshift__', '__rshift__',
         '__rsub__',
         '__rtruediv__', '__rxor__', '__setitem__', '__setslice__', '__sub__',
@@ -64,7 +67,7 @@ class Proxy(object):
 
         namespace = {}
         for name in cls._special_names:
-            if hasattr(theclass, name):
+            if hasattr(theclass, name) and not hasattr(cls, name):
                 namespace[name] = make_method(name)
         return type("%s(%s)" % (cls.__name__, theclass.__name__), (cls,),
                     namespace)
@@ -101,21 +104,21 @@ class ImapProxy(Proxy):
 
     def __getattribute__(self, name):
 
-        x = getattr(object.__getattribute__(self, "_obj"), name)
+        attribute = getattr(object.__getattribute__(self, "_obj"), name)
 
-        if callable(x):
-            def y(*args, **kwargs):
-                cache_key = x.__name__ + ':' + str(args) + str(kwargs)
+        if callable(attribute):
+            def wrapper(*args, **kwargs):
+                cache_key = attribute.__name__ + ':' + str(args) + str(kwargs)
                 if cache_key in self.cache:
                     print('Returning from cache')
                     return eval(self.cache[cache_key])
                 else:
                     print('Calling for real')
-                    r = x(*args, **kwargs)
+                    r = attribute(*args, **kwargs)
                     self.cache[cache_key] = repr(r)
                     with open('fixtures.json', 'w') as fixture_file:
                         fixture_file.write(json.dumps(self.cache, indent=4))
                     return r
-            return y
+            return wrapper
         else:
-            return x
+            return attribute

@@ -10,4 +10,9 @@ setup(
     packages=['boite'],
     description='Get things done with your mail box',
     install_requires=['clize', 'IMAPClient'],
+    entry_points={
+        'console_scripts': [
+            'boite = boite.cli:main',
+        ],
+    },
 )

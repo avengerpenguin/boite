@@ -29,7 +29,7 @@ def server():
     return server
 
 
-def test(server):
+def test_get_stuff(server):
     boite = Boite(server)
     next = boite.next_stuff()
     assert next
