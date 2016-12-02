@@ -1,5 +1,44 @@
+from __future__ import unicode_literals, print_function
 import email
+import os
 from email.parser import BytesParser
+import imapclient
+from backports import ssl
+from datetime import date
+
+HOST = os.getenv('MAIL_HOST')
+USERNAME = os.getenv('USER')
+PASSWORD = os.getenv('PASSWORD')
+
+
+def make_server():
+    context = imapclient.create_default_context()
+
+    # don't check if certificate hostname doesn't match target hostname
+    context.check_hostname = False
+
+    # don't check if the certificate is trusted by a certificate authority
+    context.verify_mode = ssl.CERT_NONE
+
+    server = imapclient.IMAPClient(HOST, use_uid=True, ssl=True, ssl_context=context)
+    server.login(USERNAME, PASSWORD)
+    return server
+
+
+def archive_stale(matchers, age):
+    cutoff = date.today() - age
+    server = make_server()
+    server.select_folder('INBOX')
+    message_ids = server.search(criteria=['BEFORE', cutoff])
+    messages = server.fetch(message_ids, ['INTERNALDATE', 'RFC822', 'UID'])
+    for uid, raw_message in messages.items():
+        message = email.message_from_bytes(raw_message[b'RFC822'])
+        for matcher in matchers:
+            matches = sum([1 for header, pattern in matcher.items() if message[header] == pattern])
+            if matches == len(matcher):
+                server.copy([uid], 'archive')
+                server.delete_messages([uid])
+                server.expunge()
 
 
 class Boite(object):

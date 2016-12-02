@@ -3,26 +3,7 @@ import clize
 import cmd
 import imapclient
 from backports import ssl
-from boite import Boite
-
-
-HOST = os.getenv('MAIL_HOST')
-USERNAME = os.getenv('USER')
-PASSWORD = os.getenv('PASSWORD')
-
-
-def make_server():
-    context = imapclient.create_default_context()
-
-    # don't check if certificate hostname doesn't match target hostname
-    context.check_hostname = False
-
-    # don't check if the certificate is trusted by a certificate authority
-    context.verify_mode = ssl.CERT_NONE
-
-    server = imapclient.IMAPClient(HOST, use_uid=True, ssl=True, ssl_context=context)
-    server.login(USERNAME, PASSWORD)
-    return server
+from boite import Boite, make_server
 
 
 class StuffShell(cmd.Cmd):
