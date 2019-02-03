@@ -6,7 +6,7 @@ import imapclient
 from backports import ssl
 from datetime import date
 import logging
-
+from progressbar import ProgressBar, ETA, Percentage, Bar
 
 HOST = os.getenv('MAIL_HOST')
 USERNAME = os.getenv('USER')
@@ -130,36 +130,47 @@ def archive_stale(server, matchers, age, folder=None):
 
     LOG.info('Looking at messages from before {cutoff}'.format(cutoff=cutoff))
     message_ids = server.search(criteria=['BEFORE', cutoff])
-    messages = server.fetch(message_ids, ['INTERNALDATE', 'RFC822', 'UID'])
 
-    for uid, raw_message in messages.items():
-        print('.', file=sys.stderr, end='')
-        sys.stderr.flush()
-        if b'RFC822' not in raw_message and b'BODY[NULL]' not in raw_message:
-            LOG.error('Weird message: ' + str(raw_message))
-            continue
-        if b'RFC822' in raw_message:
-            message = email.message_from_bytes(raw_message[b'RFC822'])
-        else:
-            message = email.message_from_bytes(raw_message[b'BODY[NULL]'])
+    LOG.info('Found {count} messages to check'.format(count=len(message_ids)))
+    pbar = ProgressBar(widgets=[ETA(), Percentage(), Bar()])
+    for message_id in pbar(message_ids):
 
-        #print(message.as_string())
+        messages = server.fetch([message_id],
+                                ['INTERNALDATE', 'RFC822', 'UID', 'ENVELOPE'])
 
-        for matcher in matchers:
-            matches = sum([1 for header, pattern in matcher.items() if check_match(message, header, pattern)])
+        for uid, raw_message in messages.items():
+            #print('.', file=sys.stderr, end='')
+            sys.stderr.flush()
 
-            if matches == len(matcher):
-                print('.', file=sys.stderr)
-                LOG.info('Archiving message with subject "{subject}" as '
-                         'it matches {matcher}'.format(
-                    subject=message['Subject'], matcher=matcher))
+            if b'RFC822' not in raw_message and b'BODY[NULL]' not in raw_message:
+                LOG.error('Weird message: ' + str(raw_message))
+                continue
+            if b'RFC822' in raw_message:
+                message = email.message_from_bytes(raw_message[b'RFC822'])
+            else:
+                message = email.message_from_bytes(raw_message[b'BODY[NULL]'])
 
-                server.copy([uid], folder)
-                server.delete_messages([uid])
-                server.expunge()
-                break
+            #print(message.as_string())
 
-    print('.', file=sys.stderr)
+            for matcher in matchers:
+                matches = sum([1 for header, pattern in matcher.items() if check_match(message, header, pattern)])
+
+                if matches == len(matcher):
+                    #print('.', file=sys.stderr)
+                    LOG.info('Archiving message with subject "{subject}" as '
+                             'it matches {matcher}'.format(
+                        subject=message['Subject'], matcher=matcher))
+
+                    if callable(folder):
+                        server.copy([uid], folder(raw_message))
+                    else:
+                        server.copy([uid], folder)
+                    server.delete_messages([uid])
+                    break
+
+    server.expunge()
+
+    #print('.', file=sys.stderr)
 
 
 def mark_spam(server, matchers):
@@ -169,35 +180,41 @@ def mark_spam(server, matchers):
     LOG.info('Scanning all messages for spam...')
 
     message_ids = server.search()
-    messages = server.fetch(message_ids, ['INTERNALDATE', 'RFC822', 'UID'])
 
-    for uid, raw_message in messages.items():
-        print('.', file=sys.stderr, end='')
-        sys.stderr.flush()
-        if b'RFC822' not in raw_message:
-            LOG.error('Weird message: ' + str(raw_message))
-            continue
-        message = email.message_from_bytes(raw_message[b'RFC822'] or b'')
+    LOG.info('Found {count} messages to check'.format(count=len(message_ids)))
+    pbar = ProgressBar(widgets=[ETA(), Percentage(), Bar()])
+    for message_id in pbar(message_ids):
 
-        for matcher in matchers:
-            try:
-                matches = sum([1 for header, pattern in matcher.items() if check_match(message, header, pattern)])
-            except Exception as e:
-                print('Error {e} processing message: {message}'.format(e=e, message=repr(message.as_bytes())))
-                sys.exit(1)
+        messages = server.fetch([message_id],
+                                ['INTERNALDATE', 'RFC822', 'UID', 'ENVELOPE'])
 
-            if matches == len(matcher):
-                print('.', file=sys.stderr)
-                LOG.info('Marking as spam message with subject "{subject}" as it '
-                         'matches {matcher}'.format(
-                    subject=message['Subject'], matcher=matcher))
+        for uid, raw_message in messages.items():
+            #print('.', file=sys.stderr, end='')
+            sys.stderr.flush()
+            if b'RFC822' not in raw_message:
+                LOG.error('Weird message: ' + str(raw_message))
+                continue
+            message = email.message_from_bytes(raw_message[b'RFC822'] or b'')
 
-                server.copy([uid], 'spam')
-                server.delete_messages([uid])
-                server.expunge()
-                break
+            for matcher in matchers:
+                try:
+                    matches = sum([1 for header, pattern in matcher.items() if check_match(message, header, pattern)])
+                except Exception as e:
+                    print('Error {e} processing message: {message}'.format(e=e, message=repr(message.as_bytes())))
+                    sys.exit(1)
 
-    print('.', file=sys.stderr)
+                if matches == len(matcher):
+                    #print('.', file=sys.stderr)
+                    LOG.info('Marking as spam message with subject "{subject}" as it '
+                             'matches {matcher}'.format(
+                        subject=message['Subject'], matcher=matcher))
+
+                    server.copy([uid], 'spam')
+                    server.delete_messages([uid])
+                    break
+
+    server.expunge()
+    #print('.', file=sys.stderr)
 
 
 class Message(object):
