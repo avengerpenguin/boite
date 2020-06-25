@@ -3,10 +3,12 @@ import email
 import os
 import sys
 import imapclient
-from backports import ssl
+#from backports import ssl
+import ssl
 from datetime import date
 import logging
 from progressbar import ProgressBar, ETA, Percentage, Bar
+
 
 HOST = os.getenv('MAIL_HOST')
 USERNAME = os.getenv('USER')
@@ -53,10 +55,10 @@ def query_yes_no(question, default="no"):
 
 
 def create_default_context():
-    return imapclient.create_default_context()
+    return ssl.create_default_context()
 
 
-def IMAP(host=None, port=None, user=None, password=None, use_uid=True, ssl=True, ssl_context=None):
+def IMAP(host, port=None, user=None, password=None, use_uid=True, ssl=True, ssl_context=None):
     server = imapclient.IMAPClient(host, port=port, use_uid=use_uid, ssl=ssl, ssl_context=ssl_context)
     server.login(user, password)
     return server
@@ -139,7 +141,6 @@ def archive_stale(server, matchers, age, folder=None):
                                 ['INTERNALDATE', 'RFC822', 'UID', 'ENVELOPE'])
 
         for uid, raw_message in messages.items():
-            #print('.', file=sys.stderr, end='')
             sys.stderr.flush()
 
             if b'RFC822' not in raw_message and b'BODY[NULL]' not in raw_message:
@@ -150,13 +151,10 @@ def archive_stale(server, matchers, age, folder=None):
             else:
                 message = email.message_from_bytes(raw_message[b'BODY[NULL]'])
 
-            #print(message.as_string())
-
             for matcher in matchers:
                 matches = sum([1 for header, pattern in matcher.items() if check_match(message, header, pattern)])
 
                 if matches == len(matcher):
-                    #print('.', file=sys.stderr)
                     LOG.info('Archiving message with subject "{subject}" as '
                              'it matches {matcher}'.format(
                         subject=message['Subject'], matcher=matcher))
@@ -169,8 +167,6 @@ def archive_stale(server, matchers, age, folder=None):
                     break
 
     server.expunge()
-
-    #print('.', file=sys.stderr)
 
 
 def mark_spam(server, matchers):
