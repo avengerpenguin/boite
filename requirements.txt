@@ -11,7 +11,7 @@ clize==4.1.1
 coverage==5.1             # via pytest-cov
 cryptography==2.9.2         # via pyopenssl
 execnet==1.7.1            # via pytest-xdist
-idna==2.9                 # via cryptography
+idna==2.10                 # via cryptography
 imapclient==2.1.0
 mock==4.0.2               # via imapclient
 pbr==5.4.5               # via mock
