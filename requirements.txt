@@ -7,23 +7,18 @@
 apipkg==1.5               # via execnet
 backports.ssl==0.0.9      # via imapclient
 cffi==1.14.0               # via cryptography
-clize==4.1.1
+clize==4.1.1              # via -r requirements.in
 coverage==5.1             # via pytest-cov
-cryptography==2.9.2         # via pyopenssl
+cryptography==2.9.2       # via pyopenssl
 execnet==1.7.1            # via pytest-xdist
-idna==2.10                 # via cryptography
-imapclient==2.1.0
+imapclient==2.1.0         # via -r requirements.in
 mock==4.0.2               # via imapclient
 pbr==5.4.5               # via mock
 py==1.9.0                # via pytest, pytest-xdist
-pyasn1==0.4.8             # via cryptography
 pycparser==2.20           # via cffi
 pyopenssl==19.1.0         # via imapclient
-pytest-cov==2.10.0
-pytest-xdist==1.32.0
-pytest==5.4.3
+pytest-cov==2.10.0         # via -r requirements.in
+pytest-xdist==1.32.0      # via -r requirements.in
+pytest==5.4.3             # via -r requirements.in, pytest-cov, pytest-xdist
 sigtools==2.0.2           # via clize
 six==1.15.0               # via clize, cryptography, imapclient, mock, pyopenssl, sigtools
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools                # via cryptography
