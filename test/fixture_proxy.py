@@ -2,7 +2,7 @@ import json
 import os
 
 
-class Proxy(object):
+class Proxy:
     __slots__ = ["_obj", "__weakref__"]
 
     def __init__(self, obj):
@@ -36,22 +36,80 @@ class Proxy(object):
     # factories
     #
     _special_names = [
-        '__abs__', '__add__', '__and__', '__call__', '__cmp__', '__coerce__',
-        '__contains__', '__delitem__', '__delslice__', '__div__', '__divmod__',
-        '__eq__', '__float__', '__floordiv__', '__ge__', '__getitem__',
-        '__getslice__', '__gt__', '__hex__', '__iadd__', '__iand__',
-        '__idiv__', '__idivmod__', '__ifloordiv__', '__ilshift__', '__imod__',
-        '__imul__', '__int__', '__invert__', '__ior__', '__ipow__',
-        '__irshift__',
-        '__isub__', '__iter__', '__itruediv__', '__ixor__', '__le__', '__len__',
-        '__long__', '__lshift__', '__lt__', '__mod__', '__mul__', '__ne__',
-        '__neg__', '__oct__', '__or__', '__pos__', '__pow__', '__radd__',
-        '__rand__', '__rdiv__', '__rdivmod__', '__reduce__', '__reduce_ex__',
-        '__repr__', '__reversed__', '__rfloordiv__', '__rlshift__', '__rmod__',
-        '__rmul__', '__ror__', '__rpow__', '__rrshift__', '__rshift__',
-        '__rsub__',
-        '__rtruediv__', '__rxor__', '__setitem__', '__setslice__', '__sub__',
-        '__truediv__', '__xor__', 'next',
+        "__abs__",
+        "__add__",
+        "__and__",
+        "__call__",
+        "__cmp__",
+        "__coerce__",
+        "__contains__",
+        "__delitem__",
+        "__delslice__",
+        "__div__",
+        "__divmod__",
+        "__eq__",
+        "__float__",
+        "__floordiv__",
+        "__ge__",
+        "__getitem__",
+        "__getslice__",
+        "__gt__",
+        "__hex__",
+        "__iadd__",
+        "__iand__",
+        "__idiv__",
+        "__idivmod__",
+        "__ifloordiv__",
+        "__ilshift__",
+        "__imod__",
+        "__imul__",
+        "__int__",
+        "__invert__",
+        "__ior__",
+        "__ipow__",
+        "__irshift__",
+        "__isub__",
+        "__iter__",
+        "__itruediv__",
+        "__ixor__",
+        "__le__",
+        "__len__",
+        "__long__",
+        "__lshift__",
+        "__lt__",
+        "__mod__",
+        "__mul__",
+        "__ne__",
+        "__neg__",
+        "__oct__",
+        "__or__",
+        "__pos__",
+        "__pow__",
+        "__radd__",
+        "__rand__",
+        "__rdiv__",
+        "__rdivmod__",
+        "__reduce__",
+        "__reduce_ex__",
+        "__repr__",
+        "__reversed__",
+        "__rfloordiv__",
+        "__rlshift__",
+        "__rmod__",
+        "__rmul__",
+        "__ror__",
+        "__rpow__",
+        "__rrshift__",
+        "__rshift__",
+        "__rsub__",
+        "__rtruediv__",
+        "__rxor__",
+        "__setitem__",
+        "__setslice__",
+        "__sub__",
+        "__truediv__",
+        "__xor__",
+        "next",
     ]
 
     @classmethod
@@ -60,8 +118,7 @@ class Proxy(object):
 
         def make_method(name):
             def method(self, *args, **kw):
-                return getattr(object.__getattribute__(self, "_obj"), name)(
-                    *args, **kw)
+                return getattr(object.__getattribute__(self, "_obj"), name)(*args, **kw)
 
             return method
 
@@ -69,8 +126,7 @@ class Proxy(object):
         for name in cls._special_names:
             if hasattr(theclass, name) and not hasattr(cls, name):
                 namespace[name] = make_method(name)
-        return type("%s(%s)" % (cls.__name__, theclass.__name__), (cls,),
-                    namespace)
+        return type(f"{cls.__name__}({theclass.__name__})", (cls,), namespace)
 
     def __new__(cls, obj, *args, **kwargs):
         """
@@ -87,8 +143,7 @@ class Proxy(object):
         try:
             theclass = cache[obj.__class__]
         except KeyError:
-            cache[obj.__class__] = theclass = cls._create_class_proxy(
-                obj.__class__)
+            cache[obj.__class__] = theclass = cls._create_class_proxy(obj.__class__)
         ins = object.__new__(theclass)
         theclass.__init__(ins, obj, *args, **kwargs)
         return ins
@@ -98,8 +153,8 @@ class ImapProxy(Proxy):
     def __init__(self, obj):
         object.__setattr__(self, "_obj", obj)
         self.cache = {}
-        if os.path.exists('fixtures.json'):
-            with open('fixtures.json') as fixtures_file:
+        if os.path.exists("fixtures.json"):
+            with open("fixtures.json") as fixtures_file:
                 self.cache = json.loads(fixtures_file.read())
 
     def __getattribute__(self, name):
@@ -107,18 +162,20 @@ class ImapProxy(Proxy):
         attribute = getattr(object.__getattribute__(self, "_obj"), name)
 
         if callable(attribute):
+
             def wrapper(*args, **kwargs):
-                cache_key = attribute.__name__ + ':' + str(args) + str(kwargs)
+                cache_key = attribute.__name__ + ":" + str(args) + str(kwargs)
                 if cache_key in self.cache:
-                    print('Returning from cache')
+                    print("Returning from cache")
                     return eval(self.cache[cache_key])
                 else:
-                    print('Calling for real')
+                    print("Calling for real")
                     r = attribute(*args, **kwargs)
                     self.cache[cache_key] = repr(r)
-                    with open('fixtures.json', 'w') as fixture_file:
+                    with open("fixtures.json", "w") as fixture_file:
                         fixture_file.write(json.dumps(self.cache, indent=4))
                     return r
+
             return wrapper
         else:
             return attribute
