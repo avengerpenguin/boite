@@ -118,7 +118,9 @@ class Proxy:
 
         def make_method(name):
             def method(self, *args, **kw):
-                return getattr(object.__getattribute__(self, "_obj"), name)(*args, **kw)
+                return getattr(object.__getattribute__(self, "_obj"), name)(
+                    *args, **kw
+                )
 
             return method
 
@@ -143,7 +145,9 @@ class Proxy:
         try:
             theclass = cache[obj.__class__]
         except KeyError:
-            cache[obj.__class__] = theclass = cls._create_class_proxy(obj.__class__)
+            cache[obj.__class__] = theclass = cls._create_class_proxy(
+                obj.__class__
+            )
         ins = object.__new__(theclass)
         theclass.__init__(ins, obj, *args, **kwargs)
         return ins
