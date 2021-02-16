@@ -1,15 +1,15 @@
-from __future__ import unicode_literals, print_function
 import os
+
 import imapclient
+import pytest
 from backports import ssl
 from fixture_proxy import ImapProxy
+
 from boite import Boite
-import pytest
 
-
-HOST = os.getenv('MAIL_HOST')
-USERNAME = os.getenv('USER')
-PASSWORD = os.getenv('PASSWORD')
+HOST = os.getenv("MAIL_HOST")
+USERNAME = os.getenv("USER")
+PASSWORD = os.getenv("PASSWORD")
 
 
 @pytest.fixture
