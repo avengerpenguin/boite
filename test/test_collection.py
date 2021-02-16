@@ -23,7 +23,9 @@ def server():
     context.verify_mode = ssl.CERT_NONE
 
     server = ImapProxy(
-        imapclient.IMAPClient(HOST, use_uid=True, ssl=True, ssl_context=context)
+        imapclient.IMAPClient(
+            HOST, use_uid=True, ssl=True, ssl_context=context
+        )
     )
     server.login(USERNAME, PASSWORD)
     return server

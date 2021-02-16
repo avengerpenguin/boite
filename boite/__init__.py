@@ -1,6 +1,7 @@
 import email
 import logging
 import os
+
 # from backports import ssl
 import ssl
 import sys
@@ -48,7 +49,9 @@ def query_yes_no(question, default="no"):
         elif choice in valid:
             return valid[choice]
         else:
-            sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
+            sys.stdout.write(
+                "Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n"
+            )
 
 
 def create_default_context():
@@ -56,7 +59,13 @@ def create_default_context():
 
 
 def IMAP(
-    host, port=None, user=None, password=None, use_uid=True, ssl=True, ssl_context=None
+    host,
+    port=None,
+    user=None,
+    password=None,
+    use_uid=True,
+    ssl=True,
+    ssl_context=None,
 ):
     server = imapclient.IMAPClient(
         host, port=port, use_uid=use_uid, ssl=ssl, ssl_context=ssl_context
@@ -75,7 +84,9 @@ def make_server():
     context.verify_mode = ssl.CERT_NONE
 
     LOG.info(f"Logging in to {HOST}...")
-    server = imapclient.IMAPClient(HOST, use_uid=True, ssl=True, ssl_context=context)
+    server = imapclient.IMAPClient(
+        HOST, use_uid=True, ssl=True, ssl_context=context
+    )
     server.login(USERNAME, PASSWORD)
     return server
 
@@ -145,7 +156,10 @@ def archive_stale(server, matchers, age, folder=None):
         for uid, raw_message in messages.items():
             sys.stderr.flush()
 
-            if b"RFC822" not in raw_message and b"BODY[NULL]" not in raw_message:
+            if (
+                b"RFC822" not in raw_message
+                and b"BODY[NULL]" not in raw_message
+            ):
                 LOG.error("Weird message: " + str(raw_message))
                 continue
             if b"RFC822" in raw_message:
@@ -252,7 +266,9 @@ class Message:
     def body(self):
         value = ""
 
-        for m in (part for part in self.message.walk() if not part.is_multipart()):
+        for m in (
+            part for part in self.message.walk() if not part.is_multipart()
+        ):
             try:
                 value = m.get_payload(decode=True)
                 break
@@ -343,7 +359,9 @@ class Boite:
     def next_stuff(self):
         self.server.select_folder(self.inbox)
         oldest = self.server.sort(sort_criteria=["ARRIVAL"])[0]
-        message = self.server.fetch([oldest], ["INTERNALDATE", "RFC822", "UID"])[oldest]
+        message = self.server.fetch(
+            [oldest], ["INTERNALDATE", "RFC822", "UID"]
+        )[oldest]
         return Stuff(oldest, message)
 
     def archive(self, stuff):
