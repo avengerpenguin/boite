@@ -145,7 +145,7 @@ def archive_stale(server, matchers, age, folder=None):
     LOG.info(f"Looking at messages from before {cutoff}")
     message_ids = server.search(criteria=["BEFORE", cutoff])
 
-    LOG.info("Found {count} messages to check".format(count=len(message_ids)))
+    LOG.info(f"Found {len(message_ids)} messages to check")
     pbar = ProgressBar(widgets=[ETA(), Percentage(), Bar()])
     for message_id in pbar(message_ids):
 
@@ -169,11 +169,11 @@ def archive_stale(server, matchers, age, folder=None):
 
             for matcher in matchers:
                 matches = sum(
-                    [
+                    
                         1
                         for header, pattern in matcher.items()
                         if check_match(message, header, pattern)
-                    ]
+                    
                 )
 
                 if matches == len(matcher):
@@ -202,7 +202,7 @@ def mark_spam(server, matchers):
 
     message_ids = server.search()
 
-    LOG.info("Found {count} messages to check".format(count=len(message_ids)))
+    LOG.info(f"Found {len(message_ids)} messages to check")
     pbar = ProgressBar(widgets=[ETA(), Percentage(), Bar()])
     for message_id in pbar(message_ids):
 
@@ -221,11 +221,11 @@ def mark_spam(server, matchers):
             for matcher in matchers:
                 try:
                     matches = sum(
-                        [
+                        
                             1
                             for header, pattern in matcher.items()
                             if check_match(message, header, pattern)
-                        ]
+                        
                     )
                 except Exception as e:
                     print(
@@ -325,11 +325,11 @@ def stream(server, matchers, age=None):
         for matcher in matchers:
             try:
                 matches = sum(
-                    [
+                    
                         1
                         for header, pattern in matcher.items()
                         if check_match(message, header, pattern)
-                    ]
+                    
                 )
             except Exception as e:
                 print(
