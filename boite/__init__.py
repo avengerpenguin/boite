@@ -169,11 +169,9 @@ def archive_stale(server, matchers, age, folder=None):
 
             for matcher in matchers:
                 matches = sum(
-                    
-                        1
-                        for header, pattern in matcher.items()
-                        if check_match(message, header, pattern)
-                    
+                    1
+                    for header, pattern in matcher.items()
+                    if check_match(message, header, pattern)
                 )
 
                 if matches == len(matcher):
@@ -221,11 +219,9 @@ def mark_spam(server, matchers):
             for matcher in matchers:
                 try:
                     matches = sum(
-                        
-                            1
-                            for header, pattern in matcher.items()
-                            if check_match(message, header, pattern)
-                        
+                        1
+                        for header, pattern in matcher.items()
+                        if check_match(message, header, pattern)
                     )
                 except Exception as e:
                     print(
@@ -325,11 +321,9 @@ def stream(server, matchers, age=None):
         for matcher in matchers:
             try:
                 matches = sum(
-                    
-                        1
-                        for header, pattern in matcher.items()
-                        if check_match(message, header, pattern)
-                    
+                    1
+                    for header, pattern in matcher.items()
+                    if check_match(message, header, pattern)
                 )
             except Exception as e:
                 print(
