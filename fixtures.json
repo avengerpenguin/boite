@@ -1,5 +1,5 @@
 {
-    "sort:(){'sort_criteria': ['ARRIVAL']}": "[2, 3, 5, 7, 11]",
-    "login:('post@rossfenning.co.uk', ''){}": "b'Logged in'",
-    "select_folder:('INBOX',){}": "{b'PERMANENTFLAGS': (b'\\\\Answered', b'\\\\Flagged', b'\\\\Deleted', b'\\\\Seen', b'\\\\Draft', b'NonJunk', b'$MDNSent', b'$Forwarded', b'Junk', b'Old', b'X-GTD-Test', b'\\\\*'), b'EXISTS': 5818, b'RECENT': 0, b'UIDVALIDITY': 1232115195, b'FLAGS': (b'\\\\Answered', b'\\\\Flagged', b'\\\\Deleted', b'\\\\Seen', b'\\\\Draft', b'NonJunk', b'$MDNSent', b'$Forwarded', b'Junk', b'Old', b'X-GTD-Test'), b'UIDNEXT': 32915, b'UNSEEN': [b'2494'], b'READ-WRITE': True, b'HIGHESTMODSEQ': 33660}"
+  "sort:(){'sort_criteria': ['ARRIVAL']}": "[2, 3, 5, 7, 11]",
+  "login:('post@rossfenning.co.uk', ''){}": "b'Logged in'",
+  "select_folder:('INBOX',){}": "{b'PERMANENTFLAGS': (b'\\\\Answered', b'\\\\Flagged', b'\\\\Deleted', b'\\\\Seen', b'\\\\Draft', b'NonJunk', b'$MDNSent', b'$Forwarded', b'Junk', b'Old', b'X-GTD-Test', b'\\\\*'), b'EXISTS': 5818, b'RECENT': 0, b'UIDVALIDITY': 1232115195, b'FLAGS': (b'\\\\Answered', b'\\\\Flagged', b'\\\\Deleted', b'\\\\Seen', b'\\\\Draft', b'NonJunk', b'$MDNSent', b'$Forwarded', b'Junk', b'Old', b'X-GTD-Test'), b'UIDNEXT': 32915, b'UNSEEN': [b'2494'], b'READ-WRITE': True, b'HIGHESTMODSEQ': 33660}"
 }
